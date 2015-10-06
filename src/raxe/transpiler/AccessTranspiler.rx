@@ -7,7 +7,7 @@ class self :: Transpiler
 def new()
 end
 
-def tokens() : Array(:String:)
+def tokens() : Array<String>
   return [
     "{", "}", "[", "]", "(", ")", "@",
     "//", "/*", "*/", "\"",

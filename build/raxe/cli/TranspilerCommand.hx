@@ -12,7 +12,7 @@ class TranspilerCommand{
  *
  * Size of the files (file_size) for files
  **/
-private var files =new  Map<String, Int>();
+private var files = Map<String, Int>new ();
 
 private var src : String;
 
@@ -76,7 +76,7 @@ dynamic public function transpile(all: Bool) : Bool{
       dest = dest.substr(0, dest.length - 1);
     }
 
-    var currentFiles =new  Map<String, Int>();
+    var currentFiles = Map<String, Int>new ();
 
     for(file in files.iterator()){
       var oldFileSize : Int = this.files.get(file);

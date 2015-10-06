@@ -5,7 +5,7 @@ class StringHandle{
 public var content : String;
 public var position : Int;
 public var current : String;
-public var tokens : Array<String>;
+public var tokens : Array<String>
 
 public function new(content : String, ?tokens : Array<String>, position : Int = 0){
   this.content = content;

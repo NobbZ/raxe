@@ -4,10 +4,10 @@ import raxe.tools.StringHandle;
 
 class TranspilerGroup{
 
-public var transpilers : Array<Transpiler>;
+public var transpilers : Array<Transpiler>
 
 public function new(){
-  transpilers =new  Array<Transpiler>();
+  transpilers = Array<Transpiler>new ();
 };
 
 dynamic public function push(transpiler : Transpiler) : TranspilerGroup{

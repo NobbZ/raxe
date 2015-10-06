@@ -26,7 +26,7 @@ def setName(name : String) : CoreTranspiler
   return this
 end
 
-def tokens() : Array(:String:)
+def tokens() : Array<String>
   return [
     -- Line break
     "\n",
@@ -35,7 +35,7 @@ def tokens() : Array(:String:)
     "<", "::",
 
     -- Generics
-    "(:", ":)",
+    ">",
 
     -- Standard keywords
     "\"", "(", ")", "/", "=", "#", ",", "@", "]", "[",
@@ -234,12 +234,6 @@ def transpile(handle : StringHandle)
         insertDynamic = false
       end
 
-      if(handle.is("(:"))
-        handle.next(":)")
-        handle.increment()
-        handle.nextToken()
-      end
-
       if(handle.is("("))
         handle.position = position
 
@@ -334,7 +328,28 @@ def transpile(handle : StringHandle)
           handle.remove()
           handle.insert(name)
         elsif(handle.is("<"))
-          handle.remove()
+          def count = 1
+          def position = handle.position
+          handle.increment()
+
+          while(safeNextToken(handle))
+            if(handle.is(">"))
+              count = count - 1
+              handle.increment()
+            elsif(handle.is("<"))
+              count = count + 1
+              handle.increment()
+            elsif(handle.is(","))
+              handle.increment()
+            elsif(handle.is("::") || handle.is("\n"))
+              if (count == 1)
+                handle.position = position
+              end
+              break
+            end
+          end
+
+          handle.remove("<")
           handle.insert("extends")
         elsif(handle.is("::"))
           handle.remove()

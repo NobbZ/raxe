@@ -5,9 +5,9 @@ class self
 def content : String
 def position : Int
 def current : String
-def tokens : Array(:String:)
+def tokens : Array<String>
 
-def new(content : String, ?tokens : Array(:String:), position : Int = 0)
+def new(content : String, ?tokens : Array<String>, position : Int = 0)
   this.content = content
 
   if(tokens == null)
@@ -63,7 +63,7 @@ def is(content : String) : Bool
   return current == content
 end
 
-def isOne(content : Array(:String:)) : Bool
+def isOne(content : Array<String>) : Bool
   def contains = false
 
   for(cnt in content)

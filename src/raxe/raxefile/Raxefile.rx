@@ -21,7 +21,7 @@ end
 def createScript() : RaxeScript
   def script = RaxeScript.new()
 
-  script.variables.set("sh", do(cmd : String, ?args : Array(:String:))
+  script.variables.set("sh", do(cmd : String, ?args : Array<String>)
     Sys.command(cmd, args)
   end)
 

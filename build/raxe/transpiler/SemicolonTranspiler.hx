@@ -4,16 +4,16 @@ import raxe.tools.StringHandle;
 
 class SemicolonTranspiler implements Transpiler{
 
-public var counter : Array<Int>;
+public var counter : Array<Int>
 
 public function new(){
-  counter =new  Array<Int>();
+  counter = Array<Int>new ();
 };
 
 dynamic public function tokens() : Array<String>{
   return [
     ")", "}", ";",
-    "(:", ":)", "#", "\"",
+    "#", "\"",
     "@", "//", "/**", "**/",
     "=", "+", "-", "*", ".", "/", "," , "|", "&", "{", "(", "[", "^", "%", "<", ">", "~",
     "if", "for", "while", "else", "try", "catch",
@@ -98,6 +98,29 @@ dynamic public function skipLines(handle : StringHandle){
       }
 
       handle.increment();
+    }else if(handle.is("<")){
+      var count = 1;
+      var position = handle.position;
+      handle.increment();
+
+      while(safeNextToken(handle)){
+        if(handle.is(">")){
+          count = count - 1;
+          handle.increment();
+        }else if(handle.is("<")){
+          count = count + 1;
+          handle.increment();
+        }else if(handle.is(",")){
+          handle.increment();
+        }else{
+          if (count == 1){
+            handle.position = position;
+          }
+          break;
+        }
+      };
+
+      handle.increment();
     }else if(handle.is("#")){
       handle.next("\n");
       handle.increment();
@@ -150,14 +173,6 @@ dynamic public function skipLines(handle : StringHandle){
       if(!handle.safeis("else") && !handle.safeis("catch")){
         handle.increment();
       }
-    }else if(handle.is("(:")){
-      handle.remove();
-      handle.insert("<");
-      handle.next(":)");
-      handle.remove();
-      handle.insert(">");
-      handle.increment();
-      break;
     }else{
       break;
     }
@@ -170,6 +185,26 @@ dynamic public function onlyWhitespace(content : String, from : Int, to : Int){
   var sub = content.substr(from, to - from);
   var regex =new  EReg("^\\s*$", "");
   return regex.match(sub);
+};
+
+private dynamic function safeNextToken(handle : StringHandle) : Bool{
+  handle.nextToken();
+
+  if (safeCheck(handle, "if") && safeCheck(handle, "for") && safeCheck(handle, "while") &&
+      safeCheck(handle, "else")  && safeCheck(handle, "try") && safeCheck(handle, "catch")){
+    return true;
+  }else{
+    handle.increment();
+    return safeNextToken(handle);
+  }
+};
+
+private dynamic function safeCheck(handle : StringHandle, content : String) : Bool{
+  if(handle.is(content)){
+    return handle.safeis(content);
+  }
+
+  return true;
 };
 
 }

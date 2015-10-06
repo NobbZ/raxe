@@ -35,7 +35,7 @@ dynamic public function tokens() : Array<String>{
     "<", "::",
 
     // Generics
-    "(:", ":)",
+    ">",
 
     // Standard keywords
     "\"", "(", ")", "/", "=", "#", ",", "@", "]", "[",
@@ -234,12 +234,6 @@ dynamic public function transpile(handle : StringHandle){
         insertDynamic = false;
       }
 
-      if(handle.is("(:")){
-        handle.next(":)");
-        handle.increment();
-        handle.nextToken();
-      }
-
       if(handle.is("(")){
         handle.position = position;
 
@@ -305,10 +299,6 @@ dynamic public function transpile(handle : StringHandle){
       consumeCurlys(handle);
       handle.insert("{");
       handle.increment();
-    }else if(handle.safeis("next")){
-      handle.remove();
-      handle.insert("continue");
-      handle.increment();
     // Inser begin and end brackets around else but do not try to
     // process curlys because there will not be any
     }else if(handle.safeis("else")){
@@ -338,7 +328,28 @@ dynamic public function transpile(handle : StringHandle){
           handle.remove();
           handle.insert(name);
         }else if(handle.is("<")){
-          handle.remove();
+          var count = 1;
+          var position = handle.position;
+          handle.increment();
+
+          while(safeNextToken(handle)){
+            if(handle.is(">")){
+              count = count - 1;
+              handle.increment();
+            }else if(handle.is("<")){
+              count = count + 1;
+              handle.increment();
+            }else if(handle.is(",")){
+              handle.increment();
+            }else if(handle.is("::") || handle.is("\n")){
+              if (count == 1){
+                handle.position = position;
+              }
+              break;
+            }
+          };
+
+          handle.remove("<");
           handle.insert("extends");
         }else if(handle.is("::")){
           handle.remove();
@@ -370,8 +381,8 @@ private dynamic function safeNextToken(handle : StringHandle) : Bool{
   handle.nextToken();
 
   if (safeCheck(handle, "def") && safeCheck(handle, "if") && safeCheck(handle, "elsif") && safeCheck(handle, "end")  &&
-      safeCheck(handle, "self")  && safeCheck(handle, "while") && safeCheck(handle, "for") && safeCheck(handle, "next") &&
-      safeCheck(handle, "do") && safeCheck(handle, "else") && safeCheck(handle, "require") && safeCheck(handle, "try") && safeCheck(handle, "catch")){
+      safeCheck(handle, "self")  && safeCheck(handle, "while") && safeCheck(handle, "for") && safeCheck(handle, "require") &&
+      safeCheck(handle, "do") && safeCheck(handle, "else") && safeCheck(handle, "try") && safeCheck(handle, "catch")){
     return true;
   }else{
     handle.increment();

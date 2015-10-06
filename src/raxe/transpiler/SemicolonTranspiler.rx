@@ -4,16 +4,16 @@ require "raxe/tools/StringHandle"
 
 class self :: Transpiler
 
-def counter : Array(:Int:)
+def counter : Array<Int>
 
 def new()
-  counter = Array(:Int:).new()
+  counter = Array<Int>.new()
 end
 
-def tokens() : Array(:String:)
+def tokens() : Array<String>
   return [
     ")", "}", ";",
-    "(:", ":)", "#", "\"",
+    "#", "\"",
     "@", "//", "/**", "**/",
     "=", "+", "-", "*", ".", "/", "," , "|", "&", "{", "(", "[", "^", "%", "<", ">", "~",
     "if", "for", "while", "else", "try", "catch",
@@ -98,6 +98,29 @@ def skipLines(handle : StringHandle)
       end
 
       handle.increment()
+    elsif(handle.is("<"))
+      def count = 1
+      def position = handle.position
+      handle.increment()
+
+      while(safeNextToken(handle))
+        if(handle.is(">"))
+          count = count - 1
+          handle.increment()
+        elsif(handle.is("<"))
+          count = count + 1
+          handle.increment()
+        elsif(handle.is(","))
+          handle.increment()
+        else
+          if (count == 1)
+            handle.position = position
+          end
+          break
+        end
+      end
+
+      handle.increment()
     elsif(handle.is("#"))
       handle.next("\n")
       handle.increment()
@@ -150,14 +173,6 @@ def skipLines(handle : StringHandle)
       if(!handle.safeis("else") && !handle.safeis("catch"))
         handle.increment()
       end
-    elsif(handle.is("(:"))
-      handle.remove()
-      handle.insert("<")
-      handle.next(":)")
-      handle.remove()
-      handle.insert(">")
-      handle.increment()
-      break
     else
       break
     end
@@ -170,4 +185,24 @@ def onlyWhitespace(content : String, from : Int, to : Int)
   def sub = content.substr(from, to - from)
   def regex = EReg.new("^\\s*$", "")
   return regex.match(sub)
+end
+
+private def safeNextToken(handle : StringHandle) : Bool
+  handle.nextToken()
+
+  if (safeCheck(handle, "if") && safeCheck(handle, "for") && safeCheck(handle, "while") &&
+      safeCheck(handle, "else")  && safeCheck(handle, "try") && safeCheck(handle, "catch"))
+    return true
+  else
+    handle.increment()
+    return safeNextToken(handle)
+  end
+end
+
+private def safeCheck(handle : StringHandle, content : String) : Bool
+  if(handle.is(content))
+    return handle.safeis(content)
+  end
+
+  return true
 end

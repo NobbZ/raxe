@@ -15,7 +15,7 @@ class FolderReader{
  * @return Files found
  **/
 static dynamic public function getFiles(rootFolder: String) : Array<String>{
-  var files : Array<String> =new  Array<String>();
+  var files : Array<String> = Array<String>new ();
 
   if(FileSystem.exists(rootFolder)){
     var folders : Array<String> = FileSystem.readDirectory(rootFolder);
